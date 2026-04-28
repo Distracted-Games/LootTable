@@ -1,113 +1,92 @@
-# Roblox Project Template
+# LootTable
 
-This repository serves as a public template for my Roblox development setup. It includes configuration for **Rojo**, **Selene**, **Stylua**, and the **Luau Language Server**, along with a growing collection of reusable scripts and functions available to the community.
+A lightweight, strongly-typed Luau utility for uniform and weighted random selection. Designed for Roblox, `LootTable` provides a stable and performant way to handle randomized selections with support for runtime mutations.
 
-## 🚀 Getting Started with This Template
+| 💡 *Note: While designed for Roblox, this is written in pure Luau and can be used outside of the Roblox engine.*
 
-You have two options to start using this template for your own Roblox project:
+## Features
 
-### Option 1: Create a New Repository from This Template
+- 🎲 **Uniform & Weighted Selection**: Supports simple arrays for equal probability and dictionaries for custom weights.
+- 🔄 **Stable Ordering**: Guarantees deterministic iteration order internally for predictable behavior.
+- ⚡ **Performant**: Optimized selection logic with O(1) removals via swap-back.
+- 🛠️ **Mutable**: Add or remove items dynamically at runtime.
+- 🟦 **Strictly Typed**: Full Luau type support for a better developer experience.
 
-Using the template option is great for a fresh start as it doesn't carry any of the commit history of the current project.
+## Installation
 
-1. **Use the Template**
-    - Click the green **"Use this template"** button at the top of the [GitHub repo](https://github.com/Distracted-Games/RobloxProjectTemplate).
-    - Select **"Create a new repository"** and fill in your desired repo name and settings.
-    - Click the green "**<> Code**" button and copy the repo's URL.
-2. **Navigate To Your Desired Local Parent Directory**
-    - When you perform the next step below, it will create a copy of the full project folder inside of the directory you run the command from.
-    - Make sure you have the **parent** directory open before running the command.
-    For example:
-    ```
-    ParentDirectory/
-    └── your-repo-name/ -- The name you created when using the template
-        └──  Contents of the RobloxProjectTemplate
-    ```
-3. **Clone Your New Repository**
-    ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
-    code .
-    ```
-    💡 Tip: You can paste the copied repo URL when calling `git clone`
-4. **Start Developing**
-    - Follow the setup instructions below to configure your development environment.
+### Option 1: RBXM File
+Download the latest `LootTable.rbxm` from the [Releases](https://github.com/YOUR_USERNAME/LootTable/releases) page and drag it into your Roblox Studio project (typically into `ReplicatedStorage` or `ServerStorage`).
 
-### Option 2: Clone This Repository Directly
+### Option 2: Copy-Paste
+1. Create a new `ModuleScript` named `LootTable`.
+2. Copy the source code from `LootTable.luau` and paste it into the script.
 
-If you just want to explore or start from this exact version without making your own repo:
-```bash
-git clone https://github.com/Distracted-Games/RobloxProjectTemplate.git
-cd RobloxProjectTemplate
-code .
+## Usage
+
+### Basic Array (Uniform Probability)
+```lua
+local LootTable = require(path.to.LootTable)
+
+local rarityTable = LootTable.new({"Common", "Uncommon", "Rare"})
+local result = rarityTable:getRandomItem()
+print(result) -- Equal 33.3% chance for each
 ```
-💡 Tip: If you go this route and want to make it your own, consider removing the Git history and pushing to a fresh repo.
 
-### Option 3: Using VS Code UI Rather Than CLI
+### Weighted Dictionary
+```lua
+local weights = {
+	["Common"] = 70,
+	["Uncommon"] = 25,
+	["Legendary"] = 5,
+}
 
-If you prefer to use the Source Control UI and VS Code commands, follow the steps below:
+local loot = LootTable.new(weights)
+local item = loot:getRandomItem()
+print(`You rolled: {item}`)
+```
 
-1. **Use the Template or Clone This Repository Directly**
-    - Follow the first step for Option 1 above to use the template or simply copy the URL using the "**<> Code**" button.
-2. **Clone the Reposity**
-    - Either use the `...` menu at the top of the Source Control UI and select **Clone** or use the Command Palette (`Ctrl + Shift + P`) and type `git clone`.
-    - Paste the copied repository URL and press `Enter`.
+### Getting Selection Details
+If you need both the item and its calculated probability:
+```lua
+local entry = loot:getRandomItemWithWeight()
+if entry then
+	print(`Dropped {entry.item} with a {entry.weight * 100}% chance!`)
+end
+```
 
-This should create a copy of the project's folder in the currently opened directory and move you into the project's folder. If you only see the repo's name as a folder in the explorer, then you will want to open it (`Ctrl + K`, `Ctrl + O` or `File > Open Folder...`). When in the correct folder, you should see all the directories and files as they are on GitHub without having to click into anything.
+### Dynamic Mutation
+```lua
+loot:addItem("Mythic", 1) -- Add a new item with weight 1
+loot:removeItem("Common") -- Remove an item at runtime
+```
 
-## 🔧 Development Tools & Setup
+## API Reference
 
-This template is pre-configured to support a clean and efficient Roblox development workflow:
+### `LootTable.new(items: { string } | { [string]: number })`
+Creates a new LootTable instance from either an array or a weighted dictionary.
 
-- **Rojo**: Enables structured project syncing between your local filesystem and Roblox Studio.
-- **Selene**: Provides static analysis for Luau code to catch common issues early.
-- **Stylua**: Automatically formats Luau code for consistency and readability.
-- **Luau Language Server**: Offers intelligent code completion, navigation, and diagnostics.
+| 💡 *Note: While technically set up to accept strings, you can use Roblox Instances directly as well.*
 
-## 🗂️ Project Structure & Features
+### `LootTable:getRandomItem(): string?`
+Returns a randomly selected item.
 
-- **Service Mapping**: The included `default.project.json` uses `"ignoreUnknownInstances": true` to prevent Rojo from removing existing Roblox instances not explicitly defined in your local project.  
-  - ⚠️ *Best Practice*: Create a `/Source` or `/src` folder within each service to separate scripts from assets and maintain a clean structure.
+### `LootTable:getRandomItemWithWeight(): { item: string, weight: number }?`
+Returns a randomly selected item along with its normalized probability (0 to 1).
 
-- **Stylua Configuration**: The included `stylua.toml` file ensures that required modules are sorted alphabetically, mirroring the auto-import behavior for services.
+### `LootTable:addItem(item: string, weight: number?)`
+Adds a new item to the table. If it's a weighted table, you can specify the weight (defaults to 1).
 
-- **`/OtherScripts` Folder**: A sandbox directory for experimental or test scripts that are not synced via Rojo.  
-  - This folder is listed in `.gitignore` but commented out by default, allowing you to opt in or out of version control.
+### `LootTable:removeItem(item: string): boolean`
+Removes an item from the table. Returns `true` if successful.
 
-## 🖥️ VS Code Workspace Configuration
+### `LootTable:containsItem(item: string): boolean`
+Returns whether the table contains the specified item.
 
-The template includes a `.vscode/settings.json` file to streamline your development experience in Visual Studio Code:
+### `LootTable:getAllItems(): { string }`
+Returns an array containing all items in the table.
 
-- Semantic highlighting for improved readability
-- Format-on-save with Stylua for both `.lua` and `.luau` files  
-  > 💡 *Note*: Roblox scripts should use the `.luau` extension to reflect the correct language and tooling support. Many developers still use `.lua` out of habit, but `.luau` is preferred for Roblox projects.
-- Custom icon theming for common Roblox services using Material Icon Theme
-- Side-by-side diff view for easier code comparison
-- Luau Language Server enhancements for auto-imports and completion behavior
-- Rulers at 80 and 100 columns to align with Roblox Lua Style Guide
-
-> These settings are designed to work out-of-the-box with the recommended extensions listed below.
-
-### 💡 Recommended Extensions
-
-You can optionally include a `.vscode/extensions.json` file to prompt installation of these tools:
-
-- `evaera.vscode-rojo` — Rojo integration
-- `JohnnyMorganz.stylua` — Luau code formatter
-- `JohnnyMorganz.luau-lsp` — Luau Language Server support
-- `Kampfkarren.selene-vscode` — Selene static analysis
-- `PKief.material-icon-theme` — Custom folder icons
-
-## 📦 [Optional Libraries](/OptionalLibraries/)
-
-This template also includes a selection of reusable scripts and utility functions ("libraries") designed to help other developers:
-
-- Modular components for common gameplay systems
-- Utility functions for debugging, data handling, and more
-- Examples and test cases to illustrate usage
-
-Feel free to explore, adapt, and contribute. These resources are intended to support both beginners and experienced developers working with Roblox Luau and will continue to grow over time, so check back now and then.
+### `LootTable:getAllItemsWithWeightsSorted(): { { item: string, weight: number } }`
+Returns a list of all entries sorted by their probability (ascending).
 
 ---
-
-If you find this template useful or have suggestions for improvement, feel free to open an issue or submit a pull request!
+*Developed by Distracted Games*

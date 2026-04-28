@@ -1,6 +1,6 @@
 --!strict
 --[[
-    RandomTableSelection
+    LootTable
     @author DistractedGames
     @version 2.1.1
 
@@ -17,8 +17,8 @@
     This guarantees deterministic iteration order, fast selection, and simpler
     maintenance.
 ]]
-local RandomTableSelection = {}
-RandomTableSelection.__index = RandomTableSelection
+local LootTable = {}
+LootTable.__index = LootTable
 
 export type Item = string
 
@@ -28,17 +28,17 @@ export type WeightedEntry = {
 }
 
 type ClassType = {
-    getRandomItem: (self: RandomTableSelection) -> Item?,
-    getRandomItemWithWeight: (self: RandomTableSelection) -> WeightedEntry?,
-    containsItem: (self: RandomTableSelection, item: Item) -> boolean,
-    getAllItems: (self: RandomTableSelection) -> { Item },
-    getAllItemsWithWeights: (self: RandomTableSelection) -> { WeightedEntry },
-    getAllItemsWithWeightsSorted: (self: RandomTableSelection) -> { WeightedEntry },
-    addItem: (self: RandomTableSelection, item: Item, weight: number?) -> (),
-    removeItem: (self: RandomTableSelection, item: Item) -> boolean,
+    getRandomItem: (self: LootTable) -> Item?,
+    getRandomItemWithWeight: (self: LootTable) -> WeightedEntry?,
+    containsItem: (self: LootTable, item: Item) -> boolean,
+    getAllItems: (self: LootTable) -> { Item },
+    getAllItemsWithWeights: (self: LootTable) -> { WeightedEntry },
+    getAllItemsWithWeightsSorted: (self: LootTable) -> { WeightedEntry },
+    addItem: (self: LootTable, item: Item, weight: number?) -> (),
+    removeItem: (self: LootTable, item: Item) -> boolean,
 }
 
-type RandomTableSelection = setmetatable<ClassType, typeof(RandomTableSelection)>
+type LootTable = setmetatable<ClassType, typeof(LootTable)>
 
 type PrivateState = {
     isArray: boolean,
@@ -48,7 +48,7 @@ type PrivateState = {
 	indexMap: { [Item]: number },
 }
 
-local _private: { [RandomTableSelection]: PrivateState } = setmetatable({}, { __mode = "k" }) :: any
+local _private: { [LootTable]: PrivateState } = setmetatable({}, { __mode = "k" }) :: any
 
 local function isArray(tbl: { Item } | { [Item]: number }): boolean
     if #tbl > 0 then
@@ -95,10 +95,10 @@ local function weightedSelect(itemList: { Item }, weightList: { number }, total:
 end
 
 -- Constructor
-function RandomTableSelection.new(items: { Item } | { [Item]: number }): RandomTableSelection
+function LootTable.new(items: { Item } | { [Item]: number }): LootTable
     assert(typeof(items) == "table", `[RandomTableSelection.new]: expected table, got {typeof(items)}`)
 
-    local self = setmetatable({}, RandomTableSelection) :: RandomTableSelection
+    local self = setmetatable({}, LootTable) :: LootTable
 
 	_private[self] = {
 		isArray = false,
@@ -126,7 +126,7 @@ function RandomTableSelection.new(items: { Item } | { [Item]: number }): RandomT
 end
 
 -- Core selection
-function RandomTableSelection.getRandomItem(self: RandomTableSelection): Item?
+function LootTable.getRandomItem(self: LootTable): Item?
 	local state = _private[self]
 
     if #state.itemList == 0 then
@@ -141,7 +141,7 @@ function RandomTableSelection.getRandomItem(self: RandomTableSelection): Item?
     end
 end
 
-function RandomTableSelection.getRandomItemWithWeight(self: RandomTableSelection): WeightedEntry?
+function LootTable.getRandomItemWithWeight(self: LootTable): WeightedEntry?
 	local state = _private[self]
 
     local item = self:getRandomItem()
@@ -161,19 +161,19 @@ function RandomTableSelection.getRandomItemWithWeight(self: RandomTableSelection
 end
 
 -- Queries
-function RandomTableSelection.containsItem(self: RandomTableSelection, item: Item): boolean
+function LootTable.containsItem(self: LootTable, item: Item): boolean
 	local state = _private[self]
 
     return state.indexMap[item] ~= nil
 end
 
-function RandomTableSelection.getAllItems(self: RandomTableSelection): { Item }
+function LootTable.getAllItems(self: LootTable): { Item }
 	local state = _private[self]
 
     return table.clone(state.itemList)
 end
 
-function RandomTableSelection.getAllItemsWithWeights(self: RandomTableSelection): { WeightedEntry }
+function LootTable.getAllItemsWithWeights(self: LootTable): { WeightedEntry }
 	local state = _private[self]
 
     local result = {}
@@ -195,7 +195,7 @@ function RandomTableSelection.getAllItemsWithWeights(self: RandomTableSelection)
     return result
 end
 
-function RandomTableSelection.getAllItemsWithWeightsSorted(self: RandomTableSelection): { WeightedEntry }
+function LootTable.getAllItemsWithWeightsSorted(self: LootTable): { WeightedEntry }
     local entries = self:getAllItemsWithWeights()
 
     table.sort(entries, function(a: WeightedEntry, b: WeightedEntry)
@@ -206,7 +206,7 @@ function RandomTableSelection.getAllItemsWithWeightsSorted(self: RandomTableSele
 end
 
 -- Mutation
-function RandomTableSelection.addItem(self: RandomTableSelection, item: Item, weight: number?)
+function LootTable.addItem(self: LootTable, item: Item, weight: number?)
 	local state = _private[self]
 
 	table.insert(state.itemList, item)
@@ -219,7 +219,7 @@ function RandomTableSelection.addItem(self: RandomTableSelection, item: Item, we
 	end
 end
 
-function RandomTableSelection.removeItem(self: RandomTableSelection, item: Item): boolean
+function LootTable.removeItem(self: LootTable, item: Item): boolean
 	local state = _private[self]
 
     local index = state.indexMap[item]
@@ -253,4 +253,4 @@ function RandomTableSelection.removeItem(self: RandomTableSelection, item: Item)
     return true
 end
 
-return RandomTableSelection
+return LootTable
