@@ -14,8 +14,8 @@ A lightweight, strongly-typed Luau utility for uniform and weighted random selec
 
 ## Installation
 
-### Option 1: RBXM File
-Download the latest `LootTable.rbxm` from the [Releases](https://github.com/YOUR_USERNAME/LootTable/releases) page and drag it into your Roblox Studio project (typically into `ReplicatedStorage` or `ServerStorage`).
+### Option 1: Luau File
+Download the latest `LootTable.rbxm` from the [Releases](https://github.com/YOUR_USERNAME/LootTable/releases) page and drag it into your Roblox Studio project and move the contained module into your desired location (typically into `ReplicatedStorage` or `ServerStorage`).
 
 ### Option 2: Copy-Paste
 1. Create a new `ModuleScript` named `LootTable`.
